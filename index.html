@@ -144,7 +144,6 @@
             }
         }
 
-        /* 结局淡入 */
         @keyframes fade-in-up {
             0% {
                 opacity: 0;
@@ -1383,7 +1382,7 @@
             margin-top: 6px;
         }
 
-        /* ===== 结局覆盖层（黑屏白字） ===== */
+        /* 结局覆盖层（黑屏白字） */
         #crash-overlay {
             position: fixed;
             top: 0;
@@ -1832,14 +1831,14 @@
         <div class="flash-content" id="flash-content">你看到了什么？</div>
     </div>
 
-    <!-- ===== 结局覆盖层（黑屏白字） ===== -->
+    <!-- ===== 结局覆盖层 ===== -->
     <div id="crash-overlay">
         <div class="end-title">你不是早就知道吗？</div>
         <div class="end-sub">末日只是一场梦。</div>
         <button class="end-btn" id="end-exit-btn">退 出</button>
     </div>
 
-    <!-- 模态框：后台一（点击题目触发） -->
+    <!-- 模态框：后台一 -->
     <div id="modal-overlay" class="modal-overlay">
         <div class="modal-box">
             <h2 id="modal-title">📜 系统日志</h2>
@@ -1862,7 +1861,7 @@
         </div>
     </div>
 
-    <!-- 模态框：后台二内容（历史记录） -->
+    <!-- 模态框：后台二内容 -->
     <div id="history-modal" class="modal-overlay">
         <div class="modal-box">
             <h2>📜 循环记录</h2>
@@ -2631,7 +2630,6 @@
             hasCompletedOnce: false,
             round: 0,
             isAuthenticated: false,
-            effectActive: false,
             effectTimer: null,
             autoSubmitPending: false,
             dimensionScores: [0, 0, 0, 0],
@@ -2828,27 +2826,14 @@
         }
 
         // ================================================================
-        //  结局触发（黑屏白字）
+        //  结局触发
         // ================================================================
 
         function triggerPageCrash() {
             // 隐藏所有界面容器
-            document.querySelectorAll('.container').forEach(el => {
-                el.style.display = 'none';
-            });
-            // 隐藏覆盖层
-            document.querySelectorAll('.modal-overlay, .flash-text-overlay, #corruption-overlay, #scanline-overlay, #glitch-overlay, .blood-overlay')
+            document.querySelectorAll('.container, .nav-bar, .forum-body, .forum-stats, #post-list, .modal-overlay, .flash-text-overlay, #corruption-overlay, #scanline-overlay, #glitch-overlay, .blood-overlay')
                 .forEach(el => {
-                    el.style.display = 'none';
-                });
-            // 隐藏导航栏等
-            document.querySelectorAll('.nav-bar, .forum-body, .forum-stats, #post-list').forEach(el => {
-                if (el) el.style.display = 'none';
-            });
-            // 隐藏所有其他元素
-            document.querySelectorAll('.container, .forum-container, .register-container, .quiz-container, .result-container, .post-detail-container')
-                .forEach(el => {
-                    el.style.display = 'none';
+                    if (el) el.style.display = 'none';
                 });
 
             // 强制body纯黑
@@ -2865,12 +2850,10 @@
             crashOverlay.classList.add('active');
         }
 
-        // 退出处理
         function handleExit() {
             try {
                 window.close();
             } catch (e) {
-                // 如果无法关闭，显示提示
                 document.body.innerHTML = `
                     <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#000;color:#666;font-family:SimSun,serif;font-size:18px;letter-spacing:2px;text-align:center;padding:20px;">
                         <div>
@@ -3042,7 +3025,6 @@
             if (confirm('确定要退出吗？')) {
                 state.username = '';
                 localStorage.removeItem('nightforum_user');
-                // 重置所有状态
                 state.isAuthenticated = false;
                 state.hasCompletedOnce = false;
                 state.round = 0;
@@ -3133,6 +3115,29 @@
             }
         });
 
+        // ================================================================
+        //  帖子点击 — 使用事件委托（修复关键）
+        // ================================================================
+
+        document.getElementById('post-list').addEventListener('click', function(e) {
+            // 查找点击的目标是否是帖子元素
+            const postEl = e.target.closest('.forum-post');
+            if (!postEl) return;
+
+            // 排除 entry-post（认证入口）和 announcement-post（公告）
+            if (postEl.classList.contains('entry-post') || postEl.id === 'post-announcement') return;
+
+            const postId = postEl.dataset.postid;
+            if (postId && POSTS[postId]) {
+                e.stopPropagation();
+                openPostDetail(postId);
+            }
+        });
+
+        // ================================================================
+        //  认证入口点击
+        // ================================================================
+
         entryPost.addEventListener('click', function() {
             if (!state.isAuthenticated) {
                 startQuiz();
@@ -3142,6 +3147,10 @@
                 }
             }
         });
+
+        // ================================================================
+        //  公告弹窗点击
+        // ================================================================
 
         postAnnouncement.addEventListener('click', function() {
             if (state.isBlocked) {
@@ -3248,7 +3257,10 @@
 
         function openPostDetail(postId) {
             const post = POSTS[postId];
-            if (!post) return;
+            if (!post) {
+                console.warn('帖子不存在:', postId);
+                return;
+            }
 
             postDetailTitle.textContent = post.title;
             postDetailContent.innerHTML = post.content;
