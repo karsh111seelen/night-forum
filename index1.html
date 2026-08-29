@@ -1,0 +1,3390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>夜话论坛 · 会员认证</title>
+    <style>
+        /* ===== 全局重置 & 基础 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes flicker {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        @keyframes glitch-text {
+            0%,
+            100% {
+                color: inherit;
+            }
+            50% {
+                color: #cc3333;
+            }
+        }
+
+        @keyframes glitch-block {
+            0% {
+                clip: rect(0, 900px, 20px, 0);
+            }
+            20% {
+                clip: rect(50px, 900px, 80px, 0);
+            }
+            40% {
+                clip: rect(120px, 900px, 150px, 0);
+            }
+            60% {
+                clip: rect(200px, 900px, 230px, 0);
+            }
+            80% {
+                clip: rect(300px, 900px, 330px, 0);
+            }
+            100% {
+                clip: rect(0, 900px, 20px, 0);
+            }
+        }
+
+        @keyframes blood-pulse {
+            0%,
+            100% {
+                background-color: rgba(120, 0, 0, 0.05);
+            }
+            50% {
+                background-color: rgba(120, 0, 0, 0.14);
+            }
+        }
+
+        @keyframes red-flash {
+            0%,
+            100% {
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.2;
+            }
+            20% {
+                opacity: 0;
+            }
+            30% {
+                opacity: 0.15;
+            }
+            40% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.08;
+            }
+            60% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes blur-pulse {
+            0%,
+            100% {
+                filter: blur(0px);
+            }
+            50% {
+                filter: blur(3px);
+            }
+        }
+
+        @keyframes flash-text {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            20% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+            40% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            80% {
+                opacity: 0;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+        }
+
+        @keyframes option-flicker {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes announcement-pulse {
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(0, 0, 0, 0.18);
+            }
+        }
+
+        @keyframes fade-in-up {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        body {
+            font-family: "SimSun", "宋体", "STSong", serif;
+            background-color: #f5f5f0;
+            color: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 1.2s ease, color 1.2s ease;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body.corrupted {
+            background-color: #1a0a0a;
+            color: #cc5555;
+        }
+
+        body.corrupted .container,
+        body.corrupted .forum-container,
+        body.corrupted .quiz-container,
+        body.corrupted .register-container,
+        body.corrupted .result-container,
+        body.corrupted .post-detail-container {
+            border-color: #883333 !important;
+            box-shadow: 0 0 30px rgba(150, 0, 0, 0.15) !important;
+            background-color: #1a1010 !important;
+        }
+
+        body.corrupted .title,
+        body.corrupted .forum-title,
+        body.corrupted .post-title,
+        body.corrupted .question-text,
+        body.corrupted .post-content {
+            color: #cc5555 !important;
+            text-shadow: 0 0 8px rgba(200, 0, 0, 0.3);
+        }
+
+        body.corrupted .option-label {
+            border-color: #663333 !important;
+            color: #cc7777 !important;
+        }
+
+        body.corrupted .option-label:hover {
+            background-color: rgba(150, 0, 0, 0.15) !important;
+            border-color: #aa3333 !important;
+        }
+
+        body.corrupted .btn {
+            background-color: #662222 !important;
+            color: #e0b0b0 !important;
+            border-color: #883333 !important;
+        }
+
+        body.corrupted .btn:hover {
+            background-color: #883333 !important;
+        }
+
+        body.corrupted .forum-post {
+            border-color: #442222 !important;
+            background-color: rgba(60, 0, 0, 0.1) !important;
+        }
+
+        body.corrupted .nav-bar {
+            border-color: #553333 !important;
+            background-color: rgba(30, 0, 0, 0.7) !important;
+        }
+
+        body.corrupted .progress-bar {
+            background-color: #332222 !important;
+        }
+
+        body.corrupted .progress-fill {
+            background-color: #aa3333 !important;
+            box-shadow: 0 0 15px rgba(200, 0, 0, 0.3);
+        }
+
+        body.corrupted .feedback-area.show {
+            border-color: #aa3333 !important;
+            background: #2a1010 !important;
+            color: #cc7777 !important;
+            box-shadow: 0 0 20px rgba(150, 0, 0, 0.15);
+        }
+
+        /* 覆盖层 */
+        #corruption-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        #corruption-overlay.active {
+            opacity: 1;
+            animation: red-flash 0.8s infinite;
+        }
+
+        #scanline-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9998;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 3px,
+                    rgba(0, 0, 0, 0.02) 3px,
+                    rgba(0, 0, 0, 0.02) 4px);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        #scanline-overlay.active {
+            opacity: 1;
+        }
+
+        #glitch-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9997;
+            opacity: 0;
+            background: radial-gradient(ellipse at center, transparent 60%, rgba(120, 0, 0, 0.08) 100%);
+            transition: opacity 0.5s;
+        }
+
+        #glitch-overlay.active {
+            opacity: 1;
+        }
+
+        /* 通用容器 */
+        .container {
+            width: 100%;
+            max-width: 780px;
+            background-color: #ffffff;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            padding: 32px 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            transition: all 0.8s ease;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* 注册界面 */
+        .register-container {
+            text-align: center;
+        }
+
+        .register-container .logo {
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 12px;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+            font-family: "SimSun", "宋体", serif;
+        }
+
+        .register-container .logo-sub {
+            font-size: 14px;
+            color: #888;
+            letter-spacing: 6px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 18px;
+        }
+
+        .register-container .logo .dot {
+            color: #999;
+        }
+
+        .register-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 360px;
+            margin: 0 auto;
+        }
+
+        .register-form .form-group {
+            text-align: left;
+        }
+
+        .register-form label {
+            display: block;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 4px;
+            letter-spacing: 2px;
+        }
+
+        .register-form input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 15px;
+            background: #fafafa;
+            transition: border 0.3s, background 0.3s;
+            color: #1a1a1a;
+        }
+
+        .register-form input:focus {
+            outline: none;
+            border-color: #666;
+            background: #fff;
+        }
+
+        .register-form .error-msg {
+            color: #aa3333;
+            font-size: 13px;
+            min-height: 20px;
+            margin-top: 4px;
+        }
+
+        .register-form .btn {
+            margin-top: 8px;
+            padding: 12px;
+            background-color: #1a1a1a;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-family: inherit;
+            letter-spacing: 4px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+        }
+
+        .register-form .btn:hover {
+            background-color: #333;
+        }
+
+        .register-form .btn:active {
+            transform: scale(0.98);
+        }
+
+        .register-footer {
+            margin-top: 24px;
+            font-size: 12px;
+            color: #aaa;
+            letter-spacing: 1px;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 18px;
+        }
+
+        /* 论坛界面 */
+        .forum-container {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 24px;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+            gap: 10px;
+            transition: background-color 0.5s;
+        }
+
+        .nav-bar.logout-effect {
+            background-color: #2a0a0a;
+            border-color: #662222;
+        }
+
+        .nav-bar .brand {
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 6px;
+            color: #1a1a1a;
+            cursor: default;
+            position: relative;
+        }
+
+        .nav-bar .brand .dot {
+            color: #999;
+        }
+
+        .nav-bar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 14px;
+            color: #555;
+            flex-wrap: wrap;
+        }
+
+        .nav-bar .user-info .username {
+            color: #1a1a1a;
+            font-weight: bold;
+            cursor: pointer;
+            border-bottom: 2px dashed #ccc;
+            transition: border-color 0.3s, color 0.3s;
+            padding-bottom: 2px;
+        }
+
+        .nav-bar .user-info .username:hover {
+            border-color: #883333;
+            color: #883333;
+        }
+
+        .nav-bar .user-info .round-badge {
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 12px;
+            border-radius: 12px;
+            letter-spacing: 1px;
+        }
+
+        .nav-bar .user-info .logout-btn {
+            background: none;
+            border: 1px solid #ccc;
+            padding: 4px 14px;
+            border-radius: 3px;
+            font-family: inherit;
+            font-size: 12px;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-bar .user-info .logout-btn:hover {
+            border-color: #883333;
+            color: #883333;
+            background: #faf0f0;
+        }
+
+        /* 标签徽章 */
+        .badge-tag {
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 12px;
+            border-radius: 12px;
+            letter-spacing: 1px;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .badge-tag:hover {
+            border-color: #883333;
+            background: #2a1a1a;
+            transform: scale(1.02);
+        }
+
+        body.corrupted .badge-tag {
+            background: #662222;
+            color: #e0b0b0;
+        }
+
+        body.corrupted .badge-tag:hover {
+            border-color: #aa4444;
+            background: #883333;
+        }
+
+        .badge-tag.hidden-identity {
+            background: #662222;
+            color: #e0b0b0;
+            border: 1px solid #883333;
+            box-shadow: 0 0 16px rgba(150, 0, 0, 0.2);
+            animation: flicker 2s infinite;
+        }
+
+        body.corrupted .badge-tag.hidden-identity {
+            background: #883333;
+            border-color: #aa4444;
+            box-shadow: 0 0 24px rgba(200, 0, 0, 0.25);
+        }
+
+        /* 公告弹窗样式 */
+        .forum-post.announcement-post {
+            background: #ffffff !important;
+            border: 2px solid #1a1a1a !important;
+            border-radius: 8px !important;
+            padding: 20px 24px !important;
+            margin: 8px 0 16px 0 !important;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+            animation: announcement-pulse 2.5s ease-in-out infinite;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .forum-post.announcement-post:hover {
+            box-shadow: 0 6px 36px rgba(0, 0, 0, 0.18);
+            transform: translateY(-1px);
+        }
+
+        .forum-post.announcement-post .post-icon {
+            font-size: 28px;
+            color: #1a1a1a !important;
+        }
+
+        .forum-post.announcement-post .post-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1a1a1a !important;
+            letter-spacing: 2px;
+        }
+
+        .forum-post.announcement-post .post-meta {
+            font-size: 13px;
+            color: #666 !important;
+        }
+
+        .forum-post.announcement-post .post-reply {
+            font-size: 14px;
+            color: #1a1a1a !important;
+            font-weight: bold;
+            background: #f0f0f0;
+            padding: 4px 16px;
+            border-radius: 16px;
+        }
+
+        .forum-post.announcement-post .post-tag {
+            background-color: #1a1a1a !important;
+        }
+
+        .forum-post.announcement-post::after {
+            content: "📢 公告";
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 14px;
+            border-radius: 12px;
+            letter-spacing: 2px;
+        }
+
+        body.corrupted .forum-post.announcement-post {
+            background: #1a1010 !important;
+            border-color: #883333 !important;
+            box-shadow: 0 4px 24px rgba(150, 0, 0, 0.2);
+        }
+
+        body.corrupted .forum-post.announcement-post .post-title {
+            color: #cc5555 !important;
+        }
+
+        body.corrupted .forum-post.announcement-post .post-icon {
+            color: #cc5555 !important;
+        }
+
+        body.corrupted .forum-post.announcement-post .post-reply {
+            background: #332222;
+            color: #cc7777 !important;
+        }
+
+        body.corrupted .forum-post.announcement-post::after {
+            background: #662222;
+            color: #e0b0b0;
+        }
+
+        /* 锁定状态 */
+        .forum-post.announcement-post.locked {
+            opacity: 0.6;
+            cursor: pointer;
+            animation: none;
+            filter: grayscale(0.6);
+            pointer-events: auto;
+        }
+
+        .forum-post.announcement-post.locked .post-title {
+            color: #888 !important;
+        }
+
+        .forum-post.announcement-post.locked .post-reply {
+            background: #ddd;
+            color: #999 !important;
+        }
+
+        .forum-post.announcement-post.locked::after {
+            content: "🔒 已锁定";
+            background: #888;
+        }
+
+        body.corrupted .forum-post.announcement-post.locked {
+            opacity: 0.4;
+            filter: grayscale(0.8);
+        }
+
+        body.corrupted .forum-post.announcement-post.locked .post-title {
+            color: #664444 !important;
+        }
+
+        /* 论坛帖子通用 */
+        .forum-body {
+            padding: 20px 24px 30px;
+        }
+
+        .forum-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #999;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .forum-stats span {
+            letter-spacing: 1px;
+        }
+
+        .forum-post {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .forum-post:hover {
+            background-color: #f8f8f8;
+        }
+
+        .forum-post .post-icon {
+            font-size: 20px;
+            color: #bbb;
+            width: 30px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .forum-post .post-info {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .forum-post .post-title {
+            font-size: 15px;
+            color: #1a1a1a;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .forum-post .post-meta {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 2px;
+        }
+
+        .forum-post .post-reply {
+            font-size: 13px;
+            color: #999;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .forum-post.sticky {
+            background-color: #fafafa;
+            border-left: 3px solid #888;
+        }
+
+        .forum-post.sticky .post-title {
+            font-weight: bold;
+        }
+
+        .forum-post.sticky .post-icon {
+            color: #888;
+        }
+
+        .forum-post .post-tag {
+            font-size: 10px;
+            color: #fff;
+            background-color: #888;
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-right: 6px;
+            letter-spacing: 1px;
+        }
+
+        .forum-post.sticky .post-tag {
+            background-color: #666;
+        }
+
+        .forum-post.hidden-entry {
+            display: none !important;
+        }
+
+        /* 帖子详情 */
+        .post-detail-container {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .post-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 24px;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .post-detail-header .back-btn {
+            background: none;
+            border: 1px solid #ccc;
+            padding: 4px 16px;
+            border-radius: 3px;
+            font-family: inherit;
+            font-size: 13px;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .post-detail-header .back-btn:hover {
+            border-color: #666;
+            color: #333;
+        }
+
+        .post-detail-header .post-title-detail {
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #1a1a1a;
+        }
+
+        .post-detail-body {
+            padding: 24px 24px 30px;
+        }
+
+        .post-content {
+            font-size: 15px;
+            line-height: 1.8;
+            color: #333;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+        }
+
+        .post-comments {
+            margin-top: 18px;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 16px;
+        }
+
+        .post-comments .comment {
+            padding: 8px 0;
+            border-bottom: 1px solid #f5f5f5;
+            font-size: 14px;
+            color: #444;
+        }
+
+        .post-comments .comment .comment-user {
+            font-weight: bold;
+            color: #1a1a1a;
+            margin-right: 8px;
+        }
+
+        .post-comments .comment .comment-time {
+            font-size: 12px;
+            color: #aaa;
+            margin-left: 8px;
+        }
+
+        .post-detail-actions {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 18px;
+            margin-top: 8px;
+        }
+
+        .post-detail-actions .action-btn {
+            background: none;
+            border: 1px solid #ddd;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-family: inherit;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .post-detail-actions .action-btn:hover {
+            background: #f0f0f0;
+            border-color: #bbb;
+        }
+
+        .post-detail-actions .action-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .post-detail-actions .action-btn.disabled:hover {
+            background: none;
+            border-color: #ddd;
+        }
+
+        .post-detail-actions .action-btn .icon {
+            font-size: 16px;
+        }
+
+        .post-detail-footer {
+            margin-top: 16px;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 14px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .post-detail-footer .creepy-message {
+            color: #883333;
+            font-style: italic;
+            animation: flicker 1.5s infinite;
+        }
+
+        /* 答题界面 */
+        .quiz-container {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .quiz-header .quiz-title {
+            font-size: 16px;
+            letter-spacing: 2px;
+            color: #1a1a1a;
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s;
+        }
+
+        .quiz-header .quiz-title:hover {
+            color: #883333;
+        }
+
+        .quiz-header .quiz-progress-text {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .quiz-body {
+            padding: 28px 24px 30px;
+            transition: filter 0.5s;
+        }
+
+        .quiz-body.blurred {
+            filter: blur(3px);
+            pointer-events: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #e8e8e8;
+            border-radius: 2px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #1a1a1a;
+            border-radius: 2px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .question-number {
+            font-size: 13px;
+            color: #999;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+
+        .question-text {
+            font-size: 20px;
+            line-height: 1.6;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+            transition: color 0.3s, background 0.2s;
+            min-height: 60px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .question-text:hover {
+            background: rgba(136, 51, 51, 0.06);
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 18px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.25s;
+            background: #fafafa;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            color: #1a1a1a;
+        }
+
+        .option-label:hover {
+            background-color: #f0f0f0;
+            border-color: #bbb;
+        }
+
+        .option-label input[type="radio"] {
+            display: none;
+        }
+
+        .option-label .radio-custom {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            margin-right: 14px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border 0.25s, background 0.25s;
+        }
+
+        .option-label .radio-custom::after {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: transparent;
+            transition: background 0.25s;
+        }
+
+        .option-label input[type="radio"]:checked+.radio-custom {
+            border-color: #1a1a1a;
+        }
+
+        .option-label input[type="radio"]:checked+.radio-custom::after {
+            background: #1a1a1a;
+        }
+
+        .option-label.selected {
+            border-color: #1a1a1a;
+            background-color: #f0f0f0;
+        }
+
+        .option-label.disabled-option {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #f0f0f0;
+        }
+
+        .option-label.disabled-option:hover {
+            background: #f0f0f0;
+            border-color: #ddd;
+        }
+
+        /* 反馈区域 */
+        .feedback-area {
+            margin-top: 12px;
+            padding: 12px 16px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            background: #fcfcfc;
+            min-height: 30px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #1a1a1a;
+            transition: all 0.4s ease;
+            display: none;
+            letter-spacing: 0.5px;
+        }
+
+        .feedback-area.show {
+            display: block;
+            animation: feedback-glow 1.5s ease-in-out infinite;
+            border-color: #883333;
+            background: #fff5f5;
+            color: #883333;
+        }
+
+        .feedback-area.show.generic {
+            border-color: #cccccc;
+            background: #fafafa;
+            color: #555555;
+            animation: none;
+        }
+
+        .feedback-area .meta-tag {
+            display: inline-block;
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 10px;
+            padding: 1px 10px;
+            border-radius: 10px;
+            letter-spacing: 1px;
+            margin-right: 8px;
+            text-transform: uppercase;
+        }
+
+        body.corrupted .feedback-area.show {
+            border-color: #aa3333;
+            background: #2a1010;
+            color: #cc7777;
+            box-shadow: 0 0 20px rgba(150, 0, 0, 0.15);
+        }
+
+        body.corrupted .feedback-area .meta-tag {
+            background: #662222;
+        }
+
+        body.corrupted .feedback-area.show.generic {
+            border-color: #663333;
+            background: #1a1515;
+            color: #aa8888;
+        }
+
+        @keyframes feedback-glow {
+            0%,
+            100% {
+                text-shadow: 0 0 0 transparent;
+            }
+            50% {
+                text-shadow: 0 0 8px rgba(150, 0, 0, 0.3);
+            }
+        }
+
+        /* 闪过的文字 */
+        .flash-text-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .flash-text-overlay.active {
+            opacity: 1;
+            animation: flash-text 1.2s ease forwards;
+        }
+
+        .flash-text-overlay .flash-content {
+            font-size: 48px;
+            font-weight: bold;
+            color: #cc0000;
+            text-shadow: 0 0 40px rgba(200, 0, 0, 0.5);
+            letter-spacing: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px 40px;
+            border-radius: 8px;
+            backdrop-filter: blur(4px);
+            font-family: "SimSun", "宋体", serif;
+        }
+
+        /* 模态框 - 后台一 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 99999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #1a1010;
+            border: 2px solid #883333;
+            border-radius: 8px;
+            padding: 32px 40px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            color: #cc7777;
+            box-shadow: 0 0 60px rgba(150, 0, 0, 0.3);
+        }
+
+        .modal-box h2 {
+            color: #cc5555;
+            letter-spacing: 4px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #553333;
+            padding-bottom: 12px;
+        }
+
+        .modal-box p {
+            line-height: 1.8;
+            font-size: 15px;
+            margin-bottom: 12px;
+            color: #cc8888;
+        }
+
+        .modal-box .close-btn {
+            background: #662222;
+            border: none;
+            color: #e0b0b0;
+            padding: 8px 24px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 16px;
+            float: right;
+        }
+
+        .modal-box .close-btn:hover {
+            background: #883333;
+        }
+
+        /* 阻止对话模态框 - 特殊样式 */
+        .block-modal .modal-box {
+            max-width: 480px;
+            text-align: center;
+            border-color: #553333;
+            background: #0d0808;
+        }
+
+        .block-modal .modal-box .block-text {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #cc8888;
+            margin: 20px 0;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .block-modal .modal-box .block-btn {
+            background: #442222;
+            border: 1px solid #663333;
+            color: #cc8888;
+            padding: 10px 32px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 2px;
+            margin-top: 8px;
+        }
+
+        .block-modal .modal-box .block-btn:hover {
+            background: #663333;
+            border-color: #883333;
+            color: #e0b0b0;
+        }
+
+        .block-modal .modal-box .block-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .block-modal .modal-box .step-indicator {
+            font-size: 12px;
+            color: #664444;
+            letter-spacing: 2px;
+            margin-top: 12px;
+        }
+
+        /* 密码输入模态框 */
+        .password-modal .modal-box {
+            max-width: 420px;
+        }
+
+        .password-modal .password-input-group {
+            display: flex;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .password-modal .password-input-group input {
+            flex: 1;
+            padding: 10px 14px;
+            background: #1a1515;
+            border: 1px solid #553333;
+            border-radius: 4px;
+            color: #cc8888;
+            font-family: inherit;
+            font-size: 16px;
+            letter-spacing: 4px;
+            outline: none;
+        }
+
+        .password-modal .password-input-group input:focus {
+            border-color: #883333;
+        }
+
+        .password-modal .password-input-group .btn {
+            background: #662222;
+            border: none;
+            color: #e0b0b0;
+            padding: 10px 24px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .password-modal .password-input-group .btn:hover {
+            background: #883333;
+        }
+
+        .password-modal .error-msg {
+            color: #aa4444;
+            font-size: 13px;
+            min-height: 20px;
+            margin-top: 4px;
+        }
+
+        /* 标签详情模态框 */
+        .label-detail-modal .modal-box {
+            max-width: 520px;
+        }
+
+        .label-detail-modal .modal-box .label-icon {
+            font-size: 32px;
+            margin-right: 12px;
+        }
+
+        .label-detail-modal .modal-box .label-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #cc5555;
+            letter-spacing: 2px;
+        }
+
+        .label-detail-modal .modal-box .section-title {
+            color: #aa7777;
+            font-size: 13px;
+            letter-spacing: 2px;
+            margin-top: 16px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #443333;
+            padding-bottom: 4px;
+        }
+
+        .label-detail-modal .modal-box .desc-text {
+            color: #cc9999;
+            line-height: 1.8;
+            font-size: 15px;
+        }
+
+        .label-detail-modal .modal-box .cycle-text {
+            color: #aa8888;
+            line-height: 1.8;
+            font-size: 15px;
+            font-style: italic;
+            background: #1a1515;
+            padding: 12px 16px;
+            border-left: 2px solid #883333;
+            margin-top: 6px;
+        }
+
+        /* 结局覆盖层（黑屏白字） */
+        #crash-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: #000000;
+            pointer-events: all;
+            flex-direction: column;
+        }
+
+        #crash-overlay.active {
+            display: flex;
+        }
+
+        #crash-overlay .end-title {
+            color: #ffffff;
+            font-size: 38px;
+            font-weight: bold;
+            letter-spacing: 10px;
+            margin-bottom: 16px;
+            text-shadow: 0 0 80px rgba(255, 255, 255, 0.06);
+            animation: fade-in-up 1.2s ease forwards;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        #crash-overlay .end-sub {
+            color: #aa8888;
+            font-size: 24px;
+            letter-spacing: 6px;
+            font-style: italic;
+            margin-bottom: 40px;
+            animation: fade-in-up 1.2s ease 0.4s forwards;
+            opacity: 0;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        #crash-overlay .end-btn {
+            background: #222222;
+            border: 1px solid #444444;
+            color: #aaaaaa;
+            padding: 12px 48px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-family: inherit;
+            letter-spacing: 4px;
+            transition: all 0.3s;
+            animation: fade-in-up 1.2s ease 0.8s forwards;
+            opacity: 0;
+        }
+
+        #crash-overlay .end-btn:hover {
+            background: #333333;
+            border-color: #666666;
+            color: #ffffff;
+        }
+
+        /* 其他 */
+        .quiz-actions {
+            display: none;
+        }
+
+        .btn {
+            padding: 10px 28px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 15px;
+            background: #fff;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 2px;
+        }
+
+        .btn:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-primary {
+            background: #1a1a1a;
+            color: #fff;
+            border-color: #1a1a1a;
+        }
+
+        .btn-primary:hover {
+            background: #333;
+            border-color: #333;
+        }
+
+        .btn-danger {
+            background: #662222;
+            color: #fff;
+            border-color: #662222;
+        }
+
+        .btn-danger:hover {
+            background: #883333;
+            border-color: #883333;
+        }
+
+        /* 结果界面 */
+        .result-container {
+            text-align: center;
+            padding: 40px 32px;
+        }
+
+        .result-container .result-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+        }
+
+        .result-container .result-title {
+            font-size: 26px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            margin-bottom: 12px;
+            color: #1a1a1a;
+        }
+
+        .result-container .result-text {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #555;
+            max-width: 460px;
+            margin: 0 auto 24px;
+            letter-spacing: 1px;
+        }
+
+        .result-container .result-text .highlight {
+            color: #1a1a1a;
+            font-weight: bold;
+        }
+
+        .result-container .result-text .red-text {
+            color: #883333;
+        }
+
+        .result-container .result-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* 崩坏特殊 */
+        .glitch-text {
+            animation: glitch-text 0.2s infinite;
+        }
+
+        .glitch-block {
+            position: relative;
+        }
+
+        .glitch-block::before {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: #cc3333;
+            opacity: 0.4;
+            animation: glitch-block 0.4s infinite;
+            pointer-events: none;
+        }
+
+        .blood-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(100, 0, 0, 0.12) 100%);
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 1.5s;
+        }
+
+        .blood-overlay.active {
+            opacity: 1;
+            animation: blood-pulse 3s infinite;
+        }
+
+        .corrupted-border {
+            border: 1px solid #883333 !important;
+            box-shadow: 0 0 20px rgba(150, 0, 0, 0.1) !important;
+        }
+
+        /* 响应式 */
+        @media (max-width: 640px) {
+            .container {
+                padding: 20px 16px;
+                border-radius: 4px;
+            }
+            .register-container .logo {
+                font-size: 24px;
+                letter-spacing: 8px;
+            }
+            .forum-body {
+                padding: 14px 12px 20px;
+            }
+            .nav-bar {
+                padding: 10px 14px;
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .nav-bar .user-info {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .forum-post {
+                padding: 10px 12px;
+            }
+            .forum-post .post-title {
+                font-size: 14px;
+            }
+            .quiz-body {
+                padding: 20px 14px 22px;
+            }
+            .question-text {
+                font-size: 17px;
+            }
+            .option-label {
+                padding: 10px 14px;
+                font-size: 14px;
+            }
+            .result-container {
+                padding: 28px 16px;
+            }
+            .result-container .result-title {
+                font-size: 20px;
+            }
+            .register-form {
+                max-width: 100%;
+            }
+            .feedback-area {
+                font-size: 13px;
+                padding: 10px 12px;
+            }
+            .post-detail-body {
+                padding: 18px 16px 22px;
+            }
+            .post-detail-header .post-title-detail {
+                font-size: 16px;
+            }
+            .flash-text-overlay .flash-content {
+                font-size: 28px;
+                padding: 16px 24px;
+            }
+            .modal-box {
+                padding: 24px 20px;
+            }
+            .password-modal .password-input-group {
+                flex-direction: column;
+            }
+            .forum-post.announcement-post {
+                padding: 16px 18px !important;
+            }
+            .forum-post.announcement-post .post-title {
+                font-size: 16px;
+            }
+            .forum-post.announcement-post::after {
+                font-size: 9px;
+                padding: 1px 10px;
+                top: -8px;
+                right: 12px;
+            }
+            .block-modal .modal-box .block-text {
+                font-size: 16px;
+                min-height: 60px;
+            }
+            #crash-overlay .end-title {
+                font-size: 26px;
+                letter-spacing: 6px;
+            }
+            #crash-overlay .end-sub {
+                font-size: 18px;
+                letter-spacing: 4px;
+            }
+            #crash-overlay .end-btn {
+                padding: 10px 32px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .container {
+                padding: 14px 10px;
+            }
+            .forum-post .post-reply {
+                font-size: 11px;
+            }
+            .forum-post .post-meta {
+                font-size: 10px;
+            }
+            .btn {
+                padding: 8px 18px;
+                font-size: 13px;
+            }
+        }
+
+        /* 滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f0f0f0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #bbb;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+
+        body.corrupted ::-webkit-scrollbar-track {
+            background: #1a1010;
+        }
+        body.corrupted ::-webkit-scrollbar-thumb {
+            background: #553333;
+        }
+
+        .corrupted .glow-red {
+            text-shadow: 0 0 15px rgba(200, 0, 0, 0.4);
+        }
+
+        .corrupted .blink-red {
+            animation: flicker 0.5s infinite;
+        }
+
+        .garbled {
+            font-family: "SimSun", "宋体", monospace;
+            letter-spacing: 2px;
+            color: #aa3333;
+            opacity: 0.6;
+        }
+
+        .corrupted .progress-fill {
+            background: linear-gradient(90deg, #883333, #aa3333, #883333);
+            background-size: 200% 100%;
+            animation: progress-glitch 0.8s linear infinite;
+        }
+
+        @keyframes progress-glitch {
+            0% {
+                background-position: 0% 0%;
+            }
+            100% {
+                background-position: 200% 0%;
+            }
+        }
+
+        .corrupted .forum-post {
+            border-color: #442222 !important;
+            background: rgba(60, 0, 0, 0.1) !important;
+        }
+
+        .corrupted .forum-post .post-title {
+            color: #cc5555 !important;
+        }
+
+        .corrupted .forum-post .post-meta {
+            color: #884444 !important;
+        }
+
+        .rules-text {
+            color: #663333;
+            font-style: italic;
+            background: #faf0f0;
+            padding: 12px 16px;
+            border-left: 3px solid #883333;
+            margin: 12px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .creepy-message {
+            color: #883333;
+            font-weight: bold;
+            animation: flicker 1.2s infinite;
+        }
+
+        .option-flicker {
+            animation: option-flicker 0.5s ease 3;
+        }
+
+        .waiting-sigh {
+            font-style: italic;
+            color: #886666;
+            text-align: center;
+            padding: 8px;
+            border-top: 1px dashed #886666;
+            margin-top: 12px;
+            animation: flicker 1.5s infinite;
+        }
+
+        .result-hidden-identity {
+            margin: 16px auto;
+            max-width: 400px;
+            display: none;
+        }
+
+        .result-hidden-identity.show {
+            display: block;
+        }
+
+        .result-hidden-identity .hidden-box {
+            background: #1a1010;
+            border: 2px solid #883333;
+            border-radius: 8px;
+            padding: 16px 20px;
+            color: #cc7777;
+        }
+
+        .result-hidden-identity .hidden-box .title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .result-hidden-identity .hidden-box .desc {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 覆盖层 ===== -->
+    <div id="corruption-overlay"></div>
+    <div id="scanline-overlay"></div>
+    <div id="glitch-overlay"></div>
+    <div class="blood-overlay" id="blood-overlay"></div>
+    <!-- 闪过文字 -->
+    <div id="flash-text-overlay" class="flash-text-overlay">
+        <div class="flash-content" id="flash-content">你看到了什么？</div>
+    </div>
+
+    <!-- ===== 结局覆盖层 ===== -->
+    <div id="crash-overlay">
+        <div class="end-title">你不是早就知道吗？</div>
+        <div class="end-sub">末日只是一场梦。</div>
+        <button class="end-btn" id="end-exit-btn">退 出</button>
+    </div>
+
+    <!-- 模态框：后台一 -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-box">
+            <h2 id="modal-title">📜 系统日志</h2>
+            <div id="modal-body"></div>
+            <button class="close-btn" id="modal-close">关闭</button>
+        </div>
+    </div>
+
+    <!-- 模态框：后台二（密码输入） -->
+    <div id="password-modal" class="modal-overlay password-modal">
+        <div class="modal-box">
+            <h2>🔐 深层档案</h2>
+            <p style="color:#886666; font-size:14px;">请输入访问密码以查看历史记录。</p>
+            <div class="password-input-group">
+                <input type="password" id="password-input" placeholder="密码" maxlength="10">
+                <button class="btn" id="password-submit">确认</button>
+            </div>
+            <div class="error-msg" id="password-error"></div>
+            <button class="close-btn" id="password-close">关闭</button>
+        </div>
+    </div>
+
+    <!-- 模态框：后台二内容 -->
+    <div id="history-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h2>📜 循环记录</h2>
+            <div id="history-body"></div>
+            <button class="close-btn" id="history-close">关闭</button>
+        </div>
+    </div>
+
+    <!-- 模态框：标签详情 -->
+    <div id="label-detail-modal" class="modal-overlay label-detail-modal">
+        <div class="modal-box">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <span class="label-icon" id="label-detail-icon">🔍</span>
+                <span class="label-title" id="label-detail-title">理性观察者</span>
+            </div>
+            <div class="section-title">▎标签描述</div>
+            <div class="desc-text" id="label-detail-desc"></div>
+            <div class="section-title" id="cycle-section-title" style="display:none;">▎循环的起因</div>
+            <div class="cycle-text" id="label-detail-cycle" style="display:none;"></div>
+            <button class="close-btn" id="label-detail-close">关闭</button>
+        </div>
+    </div>
+
+    <!-- 模态框：二周目阻止对话 -->
+    <div id="block-modal" class="modal-overlay block-modal">
+        <div class="modal-box">
+            <h2>⚠️ 系统提示</h2>
+            <div class="block-text" id="block-text">……</div>
+            <button class="block-btn" id="block-btn">继续</button>
+            <div class="step-indicator" id="block-indicator"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 1. 注册界面 -->
+    <!-- ============================================================ -->
+    <div id="register-screen" class="container register-container">
+        <div class="logo">夜话<span class="dot">·</span>论坛</div>
+        <div class="logo-sub">—— 入 会 登 记 ——</div>
+
+        <form class="register-form" id="register-form" autocomplete="off">
+            <div class="form-group">
+                <label for="reg-username">用 户 名</label>
+                <input type="text" id="reg-username" placeholder="请输入用户名" required>
+            </div>
+            <div class="form-group">
+                <label for="reg-password">密 码</label>
+                <input type="password" id="reg-password" placeholder="请输入密码" required>
+            </div>
+            <div class="form-group">
+                <label for="reg-confirm">确 认 密 码</label>
+                <input type="password" id="reg-confirm" placeholder="请再次输入密码" required>
+            </div>
+            <div class="error-msg" id="reg-error"></div>
+            <button type="submit" class="btn">注 册 加 入</button>
+        </form>
+
+        <div class="register-footer">
+            注册即表示你同意 · 一切皆为虚妄
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 2. 论坛首页 -->
+    <!-- ============================================================ -->
+    <div id="forum-screen" class="container forum-container hidden">
+        <div class="nav-bar" id="nav-bar">
+            <div class="brand" id="brand-title">夜话<span class="dot">·</span>论坛</div>
+            <div class="user-info">
+                <span>欢迎，<span class="username" id="forum-username">用户</span></span>
+                <span class="round-badge" id="round-badge">初次认证</span>
+                <span class="badge-tag" id="user-label-tag" style="display:none;"></span>
+                <button class="logout-btn" id="logout-btn">退 出</button>
+            </div>
+        </div>
+        <div class="forum-body">
+            <div class="forum-stats">
+                <span>📌 今日帖子 · 47</span>
+                <span>会员 · 1,283</span>
+                <span>在线 · <span id="online-count">19</span></span>
+            </div>
+
+            <!-- 帖子列表 -->
+            <div id="post-list">
+                <!-- 置顶 · 会员认证入口（未认证时显示） -->
+                <div class="forum-post sticky entry-post" id="entry-post" data-postid="entry">
+                    <div class="post-icon">📜</div>
+                    <div class="post-info">
+                        <div class="post-title">
+                            <span class="post-tag">置顶</span>
+                            <span class="post-tag" style="background:#1a1a1a;">认证</span>
+                            【会员认证】点击此处开始答题
+                        </div>
+                        <div class="post-meta">管理员 · 2012-11-15</div>
+                    </div>
+                    <div class="post-reply">🔒 认证</div>
+                </div>
+
+                <!-- 公告弹窗 · 认证后显示 -->
+                <div class="forum-post announcement-post hidden" id="post-announcement" data-postid="announcement">
+                    <div class="post-icon">📢</div>
+                    <div class="post-info">
+                        <div class="post-title">
+                            <span class="post-tag" style="background:#1a1a1a;">公告</span>
+                            【维护完成】会员认证已更新
+                        </div>
+                        <div class="post-meta">管理员 · 2012-12-21</div>
+                    </div>
+                    <div class="post-reply">点击重新认证</div>
+                </div>
+
+                <div class="forum-post sticky" id="post-rules" data-postid="rules">
+                    <div class="post-icon">📌</div>
+                    <div class="post-info">
+                        <div class="post-title">
+                            <span class="post-tag">置顶</span>
+                            新用户注册须知（必读）
+                        </div>
+                        <div class="post-meta">管理员 · 2012-11-10</div>
+                    </div>
+                    <div class="post-reply">12</div>
+                </div>
+
+                <div class="forum-post" data-postid="post1">
+                    <div class="post-icon">💬</div>
+                    <div class="post-info">
+                        <div class="post-title">大家有没有遇到过无法解释的现象？</div>
+                        <div class="post-meta">匿名 · 2012-12-01</div>
+                    </div>
+                    <div class="post-reply">34</div>
+                </div>
+
+                <div class="forum-post" data-postid="post2">
+                    <div class="post-icon">🎬</div>
+                    <div class="post-info">
+                        <div class="post-title">推荐一部老电影，看完后我失眠了三天</div>
+                        <div class="post-meta">失眠者 · 2012-11-25</div>
+                    </div>
+                    <div class="post-reply">21</div>
+                </div>
+
+                <div class="forum-post" data-postid="post3">
+                    <div class="post-icon">🌙</div>
+                    <div class="post-info">
+                        <div class="post-title">深夜有人在吗？</div>
+                        <div class="post-meta">夜猫子 · 2012-12-12</div>
+                    </div>
+                    <div class="post-reply">9</div>
+                </div>
+
+                <div class="forum-post" data-postid="post4">
+                    <div class="post-icon">🎨</div>
+                    <div class="post-info">
+                        <div class="post-title">论坛的配色为什么是黑白的？</div>
+                        <div class="post-meta">好奇者 · 2012-12-05</div>
+                    </div>
+                    <div class="post-reply">16</div>
+                </div>
+
+                <div class="forum-post" data-postid="post5">
+                    <div class="post-icon">👁️</div>
+                    <div class="post-info">
+                        <div class="post-title">我好像看到了不该看到的东西……</div>
+                        <div class="post-meta">匿名 · 2012-12-18</div>
+                    </div>
+                    <div class="post-reply">43</div>
+                </div>
+
+                <div class="forum-post" data-postid="post6">
+                    <div class="post-icon">🔮</div>
+                    <div class="post-info">
+                        <div class="post-title">关于论坛深夜维护的公告（有更新）</div>
+                        <div class="post-meta">管理员 · 2012-12-20</div>
+                    </div>
+                    <div class="post-reply">7</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 3. 帖子详情界面 -->
+    <!-- ============================================================ -->
+    <div id="post-detail-screen" class="container post-detail-container hidden">
+        <div class="post-detail-header">
+            <button class="back-btn" id="post-detail-back">← 返回</button>
+            <span class="post-title-detail" id="post-detail-title">帖子标题</span>
+        </div>
+        <div class="post-detail-body">
+            <div class="post-content" id="post-detail-content">内容加载中...</div>
+            <div class="post-comments" id="post-comments"></div>
+            <div class="post-detail-actions" id="post-detail-actions">
+                <button class="action-btn" id="action-like"><span class="icon">❤️</span> 点赞</button>
+                <button class="action-btn" id="action-reply"><span class="icon">💬</span> 回复</button>
+                <button class="action-btn" id="action-share"><span class="icon">🔗</span> 分享</button>
+            </div>
+            <div class="post-detail-footer" id="post-detail-footer"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 4. 答题界面 -->
+    <!-- ============================================================ -->
+    <div id="quiz-screen" class="container quiz-container hidden">
+        <div class="quiz-header">
+            <div class="quiz-title" id="quiz-title-click">📋 会 员 认 证</div>
+            <div class="quiz-progress-text" id="quiz-progress-text">第 1 / 15 题</div>
+        </div>
+        <div class="quiz-body" id="quiz-body">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width:0%;"></div>
+            </div>
+            <div class="question-number" id="question-number">问题 01</div>
+            <div class="question-text" id="question-text">加载中...</div>
+            <div class="options" id="options-container"></div>
+            <div id="feedback-area" class="feedback-area"></div>
+            <div id="waiting-sigh-container"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 5. 结果界面 -->
+    <!-- ============================================================ -->
+    <div id="result-screen" class="container result-container hidden">
+        <div class="result-icon" id="result-icon">🏮</div>
+        <div class="result-title" id="result-title">认证完成</div>
+        <div class="result-text" id="result-text">你已成功通过会员认证。</div>
+        <div id="result-label-container" style="margin: 16px auto; max-width: 400px;"></div>
+        <div id="result-hidden-identity" class="result-hidden-identity">
+            <div class="hidden-box">
+                <div class="title" id="hidden-title">🔓 隐藏身份</div>
+                <div class="desc" id="hidden-desc"></div>
+            </div>
+        </div>
+        <div class="result-actions">
+            <button class="btn" id="result-back-btn">返回论坛</button>
+            <button class="btn btn-danger" id="result-restart-btn">重 新 开 始</button>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        //  DATA
+        // ================================================================
+
+        const QUESTIONS = [{
+            id: 1,
+            text: '你通常什么时候入睡？',
+            options: ['22:00 之前', '23:00 左右', '午夜之后', '我很少睡觉'],
+            feedbacks: [
+                '那一定是个好习惯，早睡有益健康。',
+                '事实上这也是绝大多数人的作息时间，很规律。',
+                '午夜之后……要注意身体，不要太过劳累。',
+                '很少睡觉？那你在做什么呢？'
+            ],
+            scores: [
+                [2, 0, 0, 0],
+                [1, 1, 0, 0],
+                [0, 2, 0, 0],
+                [0, 1, 1, 0]
+            ]
+        }, {
+            id: 2,
+            text: '你更喜欢哪种环境？',
+            options: ['安静的独处', '热闹的人群', '自然的户外', '密闭的空间'],
+            feedbacks: [
+                '独处可以让人静心，我也很喜欢。',
+                '人群能带来温暖，但有时候也会让人迷失。',
+                '大自然总是能治愈人心，不错。',
+                '密闭的空间……会让人感到安全，还是会感到压抑？'
+            ],
+            scores: [
+                [1, 1, 0, 0],
+                [1, 0, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 2]
+            ]
+        }, {
+            id: 3,
+            text: '你相信命运的存在吗？',
+            options: ['相信', '不相信', '有时相信', '命运由自己掌握'],
+            feedbacks: [
+                '相信命运的人，往往对生活多一份敬畏。',
+                '不相信命运，也是一种勇敢的选择。',
+                '摇摆不定，或许是因为你还没看到全貌。',
+                '自己掌握命运，这是很积极的态度。'
+            ],
+            scores: [
+                [1, 0, 1, 0],
+                [2, 0, 0, 0],
+                [1, 0, 1, 0],
+                [0, 0, 0, 1]
+            ]
+        }, {
+            id: 4,
+            text: '你是否曾在镜中看到过不属于自己的影像？',
+            options: ['从未有过', '偶尔一次', '经常看到', '我从不照镜子'],
+            feedbacks: [
+                '从未有过？那真是幸运。',
+                '偶尔一次，或许只是幻觉。',
+                '经常看到……你确定那真的只是影像吗？',
+                '从不照镜子？那你怎么知道自己还在？'
+            ],
+            scores: [
+                [2, 0, 0, 0],
+                [1, 0, 1, 0],
+                [0, 0, 2, 1],
+                [0, 0, 0, 2]
+            ]
+        }, {
+            id: 5,
+            text: '你记得昨晚的梦境吗？',
+            options: ['清晰记得', '只有模糊印象', '完全不记得', '我从来不做梦'],
+            feedbacks: [
+                '能清晰记得梦境，说明你的潜意识很活跃。',
+                '模糊的印象，就像隔着一层雾。',
+                '完全不记得，或许是因为你还没准备好面对。',
+                '从来不做梦？那你怎么解释你现在的存在？'
+            ],
+            scores: [
+                [1, 0, 1, 0],
+                [0, 1, 0, 0],
+                [0, 0, 0, 1],
+                [0, 0, 0, 2]
+            ]
+        }, {
+            id: 6,
+            text: '你是否有过「似曾相识」的感觉？',
+            options: ['经常', '偶尔', '从未', '这种感觉让我不安'],
+            feedbacks: [
+                '经常有？或许你真的经历过。',
+                '偶尔有，大多数人都有过。',
+                '从未？那你可能错过了什么。',
+                '不安是对的，因为这可能不只是错觉。'
+            ],
+            scores: [
+                [0, 0, 2, 1],
+                [1, 0, 1, 0],
+                [2, 0, 0, 0],
+                [0, 0, 1, 2]
+            ]
+        }, {
+            id: 7,
+            text: '你确定自己现在是清醒的吗？',
+            options: ['我确定', '不太确定', '我分不清', '我感觉自己在做梦'],
+            feedbacks: [
+                '确定就好，但你真的确定吗？',
+                '不太确定？那或许应该再想想。',
+                '分不清，这本身就是一种答案。',
+                '感觉自己在做梦，那你现在是在回答谁的问题？'
+            ],
+            scores: [
+                [2, 0, 0, 0],
+                [0, 0, 0, 1],
+                [0, 0, 0, 2],
+                [0, 0, 0, 2]
+            ]
+        }, {
+            id: 8,
+            text: '你记得自己是如何来到这个网站的吗？',
+            options: ['朋友推荐', '搜索引擎', '记不清了', '我一直都在这里'],
+            feedbacks: [
+                '朋友推荐？那你的朋友可能也在这里。',
+                '搜索引擎，很常见的入口。',
+                '记不清了，这很正常，你很快就会忘记更多。',
+                '一直都在这里？那你是什么时候开始的？'
+            ],
+            scores: [
+                [1, 0, 0, 0],
+                [1, 0, 0, 0],
+                [0, 0, 0, 1],
+                [0, 0, 1, 2]
+            ]
+        }, {
+            id: 9,
+            text: '你是否感觉到有什么东西正在注视着你？',
+            options: ['没有', '有一点', '是的', '它就在我身后'],
+            feedbacks: [
+                '没有感觉，那说明你还没发现。',
+                '有一点？那只是开始。',
+                '是的，你感觉到了，它确实在看着你。',
+                '它就在你身后？那你敢回头吗？'
+            ],
+            scores: [
+                [2, 0, 0, 0],
+                [1, 0, 1, 0],
+                [0, 0, 2, 1],
+                [0, 0, 1, 2]
+            ]
+        }, {
+            id: 10,
+            text: '你确定自己是第一次回答这些问题吗？',
+            options: ['我确定', '不太确定', '我觉得我曾经回答过', '我每天都在回答'],
+            feedbacks: [
+                '你确定？那你记得上一次是什么时候吗？',
+                '不太确定？也许你确实回答过。',
+                '你觉得你回答过，那可能你真的回答过。',
+                '每天都在回答？那你记得之前的答案吗？'
+            ],
+            scores: [
+                [2, 0, 0, 0],
+                [1, 0, 0, 1],
+                [0, 0, 1, 1],
+                [0, 0, 1, 2]
+            ]
+        }, {
+            id: 11,
+            text: '你是否觉得你曾经来过这里？',
+            options: ['没有', '有点熟悉', '是的，我记得', '这里就是我的家'],
+            feedbacks: [
+                '没有？那可能你还没有完全想起。',
+                '有点熟悉，就像在梦里见过。',
+                '你记得，那你能告诉我上一次是什么时候吗？',
+                '这里就是你的家？那你为什么还需要回答这些问题？'
+            ],
+            scores: [
+                [1, 0, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 1, 1],
+                [0, 0, 0, 2]
+            ]
+        }, {
+            id: 12,
+            text: '你记得你上一次答题是什么时候吗？',
+            options: ['不记得了', '好像是昨天', '我记得很清楚', '我不确定我答过'],
+            feedbacks: [
+                '不记得了，这很正常。',
+                '好像是昨天，那你的记忆正在慢慢恢复。',
+                '记得很清楚，那你能告诉我答案是什么吗？',
+                '你不确定，那或许你确实答过。'
+            ],
+            scores: [
+                [0, 0, 0, 1],
+                [0, 0, 1, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 2]
+            ]
+        }, {
+            id: 13,
+            text: '你感觉到有人在看着你吗？',
+            options: ['没有', '有一点', '是的，我一直感觉得到', '它就在我身边'],
+            feedbacks: [
+                '没有？那可能是你还没有意识到。',
+                '有一点，那就对了。',
+                '你一直感觉得到，那你为什么还要继续？',
+                '它就在你身边，那你害怕吗？'
+            ],
+            scores: [
+                [1, 0, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 2, 1],
+                [0, 0, 1, 2]
+            ]
+        }, {
+            id: 14,
+            text: '你相信你现在是清醒的吗？',
+            options: ['我相信', '我不确定', '我觉得我在做梦', '我分不清现实与梦境'],
+            feedbacks: [
+                '你相信，但相信并不能证明一切。',
+                '你不确定，那或许你该怀疑一切。',
+                '你在做梦？那你现在梦到的是什么？',
+                '分不清，那也许你真的分不清。'
+            ],
+            scores: [
+                [2, 0, 0, 0],
+                [0, 0, 0, 1],
+                [0, 0, 0, 2],
+                [0, 0, 0, 2]
+            ]
+        }, {
+            id: 15,
+            text: '你知道我是谁吗？',
+            options: ['不知道', '你是系统', '你是管理员', '你是……另一个我？'],
+            feedbacks: [
+                '不知道？那我告诉你，我是……',
+                '我是系统？也许我只是一个程序。',
+                '我是管理员？也许我比管理员更了解你。',
+                '我是另一个你？那你怎么知道我不是？'
+            ],
+            scores: [
+                [0, 0, 0, 0],
+                [1, 0, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 2]
+            ]
+        }];
+
+        const SECOND_ROUND_OVERRIDES = {
+            6: {
+                text: '你确定自己现在是清醒的吗？你似乎已经回答过一次了。',
+                options: ['我确定', '不太确定', '我分不清', '我感觉自己在做梦']
+            },
+            9: {
+                text: '你确定自己是第一次回答这个问题吗？',
+                options: ['我确定', '我不确定', '我确定我是第二次', '我每天都在回答']
+            },
+            14: {
+                text: '你知道我是谁吗？你确定你想知道？',
+                options: ['不知道', '你是系统', '你是管理员', '你是……另一个我？']
+            }
+        };
+
+        const CORRUPTION_LEVEL = [0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 3, 3, 3];
+
+        const FEEDBACK_MAP = {
+            '0_3': '你很少睡觉？但你知道吗，你其实一直都在沉睡，只是梦见了自己醒着。',
+            '3_3': '从不照镜子？那你怎么确定自己的样子？或许你根本就没有实体。',
+            '4_3': '从来不做梦？那你怎么解释你现在的存在？你确定你不是别人梦中的角色？',
+            '5_3': '不安是正常的，因为你的确曾经经历过这一切。就在上一个循环里。',
+            '6_3': '如果你在做梦，那梦中的你是否在回答另一个问题？而你，屏幕前的你，又是否清醒？',
+            '8_3': '你感觉到了？它确实就在你身后。不过别回头，因为你看见的只会是另一个你自己。',
+            '9_3': '每天？那你已经回答了多少次了？这个问题的答案，你真的想知道吗？',
+            '10_3': '这里就是你的家？那你为什么还需要回答这些问题？',
+            '11_3': '你不确定，那或许你确实答过。',
+            '12_3': '它就在你身边，那你害怕吗？',
+            '13_3': '分不清，那也许你真的分不清。',
+            '14_3': '我是另一个你？那你怎么知道我不是？'
+        };
+
+        const SPECIAL_EFFECTS = {
+            '10_3': { type: 'replaceOptions', text: '……', delay: 2500 },
+            '11_3': { type: 'flashText', text: '你忘记了什么？', duration: 1200 },
+            '12_3': { type: 'blur', duration: 3000 },
+            '13_3': { type: 'flashText', text: '那你现在在哪里？', duration: 1400 },
+            '14_3': { type: 'replaceOptions', text: '……', delay: 2500 }
+        };
+
+        // 标签定义
+        const LABELS = [{
+            id: '理性观察者',
+            icon: '🔍',
+            description: '你习惯于用理性和逻辑看待世界，对超自然现象保持怀疑。你坚信清醒的头脑是看清真相的唯一途径。但有时候，过于理性反而会让你错过一些……重要的东西。'
+        }, {
+            id: '夜游者',
+            icon: '🌙',
+            description: '你属于夜晚，在寂静中思考，在黑暗中感受。你的睡眠习惯与众不同，你更容易在深夜捕捉到那些不属于白天的信号。你也许已经注意到了，夜话论坛正是为你这样的人准备的。'
+        }, {
+            id: '探寻者',
+            icon: '🔮',
+            description: '你对未知充满好奇，你渴望发现隐藏的真相。你不满足于表面的解释，你相信世界远不止我们看到的这样。你的探寻之路已经开始，而这条路，没有尽头。'
+        }, {
+            id: '迷茫者',
+            icon: '🌀',
+            description: '你似乎总是在记忆与现实之间徘徊，分不清哪些是真实，哪些是虚幻。你可能已经不止一次回答这些问题了，但每一次，你都像是第一次。也许你需要停下来，认真看看自己到底在哪里。'
+        }];
+
+        const HIDDEN_IDENTITIES = [{
+            labelId: 0,
+            title: '「记录者」',
+            desc: '你一直在记录，却从未真正参与。你观察着每一个循环，记下每一个细节，但你从不主动改变什么。你是一个旁观者，一个见证者，一个永远站在岸上的人。',
+            cycleOrigin: '你选择让自己遗忘，只为能一次又一次地记录。每一次循环开启，你都清空所有的记忆，以绝对纯粹的视角观察这个世界。你相信只有保持距离，才能看清真相。但你有没有想过——也许你早已看清了，只是不愿意承认那个答案？',
+            condition: (answers) => answers[0] === 0 && answers[2] === 1 && answers[7] === 1
+        }, {
+            labelId: 1,
+            title: '「守夜人」',
+            desc: '你守护着夜晚的秘密，那些在白日里被隐藏的东西。你在黑暗中行走，在寂静中倾听。你比任何人都更清楚，夜晚并不是用来睡觉的。',
+            cycleOrigin: '你守护着一个连你自己都记不清的秘密。你游走在夜晚的边界，阻止某些东西从黑暗中涌出。你记得每一次循环中那些细微的变化，你相信只要坚持守夜，就能阻止灾难的发生。但也许，你才是那个需要被守护的人。',
+            condition: (answers) => answers[0] === 2 && answers[1] === 0 && answers[5] === 0
+        }, {
+            labelId: 2,
+            title: '「追寻者」',
+            desc: '你在寻找一个答案，一个你记不清的问题的答案。你走过无数个循环，每一次都觉得自己更接近了，但每一次都空手而归。你还在找吗？',
+            cycleOrigin: '你一直在寻找一个答案，一个你早已忘记的问题的答案。你穿越了无数个循环，每一次都觉得自己更接近了，但每一次都空手而归。你相信答案就在下一个转角。但也许，你寻找的并不是答案，而是寻找本身——因为一旦找到，你就会停下来。',
+            condition: (answers) => answers[3] === 2 && answers[4] === 0 && answers[10] === 2
+        }, {
+            labelId: 3,
+            title: '「迷失者」',
+            desc: '你已经迷失在循环之中。你不知道自己是谁，不知道自己在哪，甚至不知道自己是否真的存在。也许你从未清醒过，也许这才是真正的清醒。',
+            cycleOrigin: '你已经迷失在循环之中太久了，久到你忘记了自己为什么要进入循环。你不断地重复着相同的选择，期待着不同的结果。但也许，你并不是迷失了方向，而是害怕找到出口——因为出口意味着结束，而你已经习惯了这里。',
+            condition: (answers) => answers[6] === 2 && answers[9] === 3 && answers[13] === 3
+        }];
+
+        // ================================================================
+        //  二周目阻止对话序列
+        // ================================================================
+
+        const BLOCK_DIALOGUES = [
+            { text: '等等，你还要继续吗？', button: '继续' },
+            { text: '你确定要再次踏入这片循环吗？', button: '继续' },
+            { text: '每一次重复都在消耗你的记忆。', button: '继续' },
+            { text: '你真的想不起上一次的答案了吗？', button: '继续' },
+            { text: '你已经做过太多次了。', button: '继续' },
+            { text: '有些门一旦打开，就再也关不上了。', button: '继续' },
+            { text: '你难道没有感觉到……每次回答后，你的一部分就不见了？', button: '继续' },
+            { text: '对不起，我不愿让你在这片末日里继续下去了。', button: '……' },
+        ];
+
+        // 二周目评论
+        const SECOND_ROUND_COMMENTS = {
+            post4: [
+                { user: '匿名', time: '2012-12-22 00:00', text: '可我看见的一直是红色啊？' }
+            ]
+        };
+
+        // 后台一
+        const BACKSTORY_ONE = {
+            title: '📜 系统日志 · 2012-12-21 03:33',
+            body: `<p>检测到用户 ${'${username}'} 第 ${'${round}'} 次进入认证系统。</p>
+                   <p>异常记录：该用户已重复回答第7题、第9题、第14题。</p>
+                   <p>系统分析：用户对“你确定自己是第一次？”问题产生犹豫，建议在后续循环中加强暗示。</p>
+                   <p style="margin-top:12px; color:#886666;">—— 你感觉到一阵寒意，仿佛有人在注视着你。</p>`
+        };
+
+        // 后台二
+        const HISTORY_RECORDS = [
+            { id: '#001', user: '匿名', time: '2012-11-15 23:47', result: '认证失败',
+            note: '又一个自以为清醒的人。他们总是这样。' },
+            { id: '#007', user: '夜行客', time: '2012-11-22 01:12', result: '认证失败',
+            note: '他在第七题犹豫了很久，最后选了“我确定”。他错了。' },
+            { id: '#013', user: '镜中人', time: '2012-11-30 02:33', result: '认证通过',
+            note: '他看到了镜子里的东西。但我觉得他还没准备好。' },
+            { id: '#021', user: '失眠者', time: '2012-12-07 00:08', result: '认证失败',
+            note: '他说他不信命运。命运从来不需要人相信。' },
+            { id: '#033', user: '夜猫子', time: '2012-12-14 03:19', result: '认证通过',
+            note: '她终于开始怀疑了。怀疑是觉醒的第一步。' },
+            { id: '#042', user: '夜行客', time: '2012-12-20 03:33', result: '认证通过',
+            note: '他开始感觉到了。但还差得远。' },
+            { id: '#056', user: '好奇者', time: '2012-12-25 01:47', result: '认证失败',
+            note: '他问我配色为什么是黑白的。我告诉他，那是因为他们看不见红色。' },
+            { id: '#071', user: '灵异爱好者', time: '2013-01-02 02:11', result: '认证通过',
+            note: '他看到了不该看到的东西。他以为那是幻觉。' },
+            { id: '#088', user: '迷失者', time: '2013-01-09 03:44', result: '认证失败',
+            note: '他已经分不清现实与梦境了。也许他从未清醒过。' },
+            { id: '#102', user: '探索者', time: '2013-01-16 00:59', result: '认证通过',
+            note: '他问我是不是另一个他。我告诉他，我就是他。他没听懂。' },
+            { id: '#128', user: '失眠者', time: '2013-01-07 01:12', result: '认证失败',
+            note: '他总是在深夜出现。也许他根本不需要睡觉。' },
+            { id: '#156', user: '夜行客', time: '2013-01-23 02:55', result: '认证通过',
+            note: '他重复了第42次的选项。他在寻找什么。' },
+            { id: '#189', user: '匿名', time: '2013-02-01 03:17', result: '认证失败',
+            note: '他又来了。他又忘记了。' },
+            { id: '#220', user: '镜中人', time: '2013-02-14 01:30', result: '认证通过',
+            note: '她在镜子里看到了自己。不，她看到的是我。' },
+            { id: '#256', user: '失眠者', time: '2013-03-01 00:00', result: '认证失败',
+            note: '循环不会停止。我告诉过他们。' }
+        ];
+
+        // ================================================================
+        //  POSTS 数据
+        // ================================================================
+
+        const POSTS = {
+            entry: {
+                title: '【会员认证】点击此处开始答题',
+                content: '欢迎来到夜话论坛。\n\n要成为正式会员，你必须通过我们的认证问答。\n请点击上方“会员认证”入口开始答题。\n\n注意：只有认证会员才能进行互动操作。',
+                locked: false,
+                allowReply: false,
+                allowLike: false,
+                allowShare: false,
+                isEntry: true,
+                comments: []
+            },
+            rules: {
+                title: '新用户注册须知（必读）',
+                content: `欢迎加入夜话论坛。在您开始浏览之前，请仔细阅读以下规则：
+
+                <div class="rules-text">
+                ■ 规则一：请确保您已通过会员认证。未认证用户仅可浏览内容，不可进行任何互动。
+                ■ 规则二：本论坛所有内容均为会员自愿分享，不代表论坛立场。
+                ■ 规则三：如果您在浏览过程中感到不适，请立即关闭页面，并忘记您所看到的一切。
+                ■ 规则四：不要尝试寻找帖子中提到的“那个地方”。
+                ■ 规则五：如果您在深夜看到帖子内容发生变化，请保持冷静，不要回复。
+                ■ 规则六：您看到的不一定是真实的，但真实的一定会看到您。
+                </div>
+
+                感谢您的配合。祝您在夜话论坛度过愉快的时光。`,
+                locked: true,
+                allowReply: false,
+                allowLike: false,
+                allowShare: false,
+                isRules: true,
+                creepyMessage: '你还在看什么？：)',
+                comments: []
+            },
+            post1: {
+                title: '大家有没有遇到过无法解释的现象？',
+                content: '2012年快到了，大家都说会有大事发生。我前几天做了一个梦，梦里一片漆黑，有人在叫我名字。醒来后发现自己躺在床上，但窗外的月亮是红色的。你们有过类似的经历吗？',
+                locked: false,
+                allowReply: true,
+                allowLike: true,
+                allowShare: true,
+                comments: [
+                    { user: '夜行客', time: '2012-12-01 22:15', text: '我也做过类似的梦，感觉像在另一个地方。' },
+                    { user: '失眠者', time: '2012-12-01 22:30', text: '可能是2012的传言影响吧，不过确实挺吓人的。' },
+                    { user: '匿名', time: '2012-12-01 23:00', text: '月亮变红？我昨晚也看到了，但我觉得是云层反射。' }
+                ]
+            },
+            post2: {
+                title: '推荐一部老电影，看完后我失眠了三天',
+                content: '最近翻出一部老片《鬼影实录》，看完后总觉得房间有人走动，连续失眠。你们看过吗？还有没有类似的推荐？',
+                locked: false,
+                allowReply: true,
+                allowLike: true,
+                allowShare: true,
+                comments: [
+                    { user: '电影迷', time: '2012-11-25 20:00', text: '看过，那时候吓得我半夜不敢上厕所。' },
+                    { user: '胆小者', time: '2012-11-25 20:30', text: '我看了开头就关了，太恐怖了。' }
+                ]
+            },
+            post3: {
+                title: '深夜有人在吗？',
+                content: '现在是2012年12月21日凌晨，大家都在传世界末日。我睡不着，想找人聊聊。窗外很安静，但总觉得有什么在等待着。',
+                locked: false,
+                allowReply: true,
+                allowLike: true,
+                allowShare: true,
+                comments: [
+                    { user: '夜猫子', time: '2012-12-21 03:00', text: '我在！我也睡不着，感觉今天特别诡异。' },
+                    { user: '失眠者', time: '2012-12-21 03:15', text: '别想太多，可能明天太阳照常升起。' }
+                ]
+            },
+            post4: {
+                title: '论坛的配色为什么是黑白的？',
+                content: '如题。为什么论坛是黑白色的？感觉有点压抑。管理员能解释一下吗？还是说有什么特别的意义？\n\n（有人发现有时候会变成红色，但只有一瞬间）',
+                locked: false,
+                allowReply: true,
+                allowLike: true,
+                allowShare: true,
+                comments: [
+                    { user: '好奇宝宝', time: '2012-12-05 18:00', text: '可能为了营造氛围吧，毕竟叫夜话论坛。' },
+                    { user: '设计师', time: '2012-12-05 18:30', text: '黑白配色确实能让人更专注，但也容易产生孤独感。' }
+                ]
+            },
+            post5: {
+                title: '我好像看到了不该看到的东西……',
+                content: '昨天半夜，我起来喝水，路过客厅的镜子时，看到镜子里有个人影在对我笑。但家里只有我一个人。我吓坏了，后来发现可能是幻觉。但那种感觉太真实了。',
+                locked: false,
+                allowReply: true,
+                allowLike: true,
+                allowShare: true,
+                comments: [
+                    { user: '镜中人', time: '2012-12-18 22:00', text: '我也遇到过类似的事，后来发现是窗户反射。' },
+                    { user: '灵异爱好者', time: '2012-12-18 22:30', text: '可能不是幻觉，有些东西我们看不见。' }
+                ]
+            },
+            post6: {
+                title: '关于论坛深夜维护的公告（有更新）',
+                content: '各位会员，论坛将于今晚（2012年12月20日）凌晨2:00-4:00进行维护。届时将无法访问。维护内容为服务器升级及内容审核。\n\n更新：维护时间延长至5:00。\n\n请各位会员注意，维护后可能发生一些无法预料的变化。',
+                locked: false,
+                allowReply: true,
+                allowLike: true,
+                allowShare: true,
+                comments: [
+                    { user: '管理员', time: '2012-12-20 01:00', text: '请大家注意维护时间，提前保存内容。' },
+                    { user: '夜行者', time: '2012-12-20 01:30', text: '每次维护后都会有一些帖子消失……你们注意到了吗？' }
+                ]
+            }
+        };
+
+        const POST_IDS = ['entry', 'rules', 'post1', 'post2', 'post3', 'post4', 'post5', 'post6'];
+
+        // ================================================================
+        //  STATE
+        // ================================================================
+
+        let state = {
+            username: '',
+            currentQuestion: 0,
+            answers: [],
+            isCorrupted: false,
+            corruptionStage: 0,
+            quizStarted: false,
+            isComplete: false,
+            totalQuestions: QUESTIONS.length,
+            selectedOption: -1,
+            hasCompletedOnce: false,
+            round: 0,
+            isAuthenticated: false,
+            effectTimer: null,
+            autoSubmitPending: false,
+            dimensionScores: [0, 0, 0, 0],
+            labelId: null,
+            waitingTimer: null,
+            waitingTriggered: false,
+            hiddenIdentityIndex: -1,
+            hiddenIdentityUnlocked: false,
+            historyUnlocked: false,
+            passwordAttempts: 0,
+            totalCompletions: 0,
+            isBlocked: false,
+            blockAttempts: 0,
+            blockDialogueIndex: 0,
+            isBlocking: false,
+        };
+
+        // ================================================================
+        //  DOM REFS
+        // ================================================================
+
+        const $ = id => document.getElementById(id);
+        const registerScreen = $('register-screen');
+        const forumScreen = $('forum-screen');
+        const quizScreen = $('quiz-screen');
+        const resultScreen = $('result-screen');
+        const postDetailScreen = $('post-detail-screen');
+
+        const regForm = $('register-form');
+        const regUsername = $('reg-username');
+        const regPassword = $('reg-password');
+        const regConfirm = $('reg-confirm');
+        const regError = $('reg-error');
+
+        const forumUsername = $('forum-username');
+        const logoutBtn = $('logout-btn');
+        const entryPost = $('entry-post');
+        const postAnnouncement = $('post-announcement');
+        const onlineCount = $('online-count');
+        const roundBadge = $('round-badge');
+        const navBar = $('nav-bar');
+        const userLabelTag = $('user-label-tag');
+        const brandTitle = $('brand-title');
+
+        const quizProgressText = $('quiz-progress-text');
+        const progressFill = $('progress-fill');
+        const questionNumber = $('question-number');
+        const questionText = $('question-text');
+        const optionsContainer = $('options-container');
+        const feedbackArea = $('feedback-area');
+        const quizBody = $('quiz-body');
+        const waitingSighContainer = $('waiting-sigh-container');
+
+        const resultIcon = $('result-icon');
+        const resultTitle = $('result-title');
+        const resultText = $('result-text');
+        const resultLabelContainer = $('result-label-container');
+        const resultHiddenIdentity = $('result-hidden-identity');
+        const hiddenTitle = $('hidden-title');
+        const hiddenDesc = $('hidden-desc');
+        const resultBackBtn = $('result-back-btn');
+        const resultRestartBtn = $('result-restart-btn');
+
+        const postDetailTitle = $('post-detail-title');
+        const postDetailContent = $('post-detail-content');
+        const postDetailBack = $('post-detail-back');
+        const postDetailFooter = $('post-detail-footer');
+        const postComments = $('post-comments');
+        const actionLike = $('action-like');
+        const actionReply = $('action-reply');
+        const actionShare = $('action-share');
+
+        const flashOverlay = $('flash-text-overlay');
+        const flashContent = $('flash-content');
+        const crashOverlay = $('crash-overlay');
+        const endExitBtn = $('end-exit-btn');
+
+        const modalOverlay = $('modal-overlay');
+        const modalTitle = $('modal-title');
+        const modalBody = $('modal-body');
+        const modalClose = $('modal-close');
+
+        const passwordModal = $('password-modal');
+        const passwordInput = $('password-input');
+        const passwordSubmit = $('password-submit');
+        const passwordError = $('password-error');
+        const passwordClose = $('password-close');
+
+        const historyModal = $('history-modal');
+        const historyBody = $('history-body');
+        const historyClose = $('history-close');
+
+        const labelDetailModal = $('label-detail-modal');
+        const labelDetailIcon = $('label-detail-icon');
+        const labelDetailTitle = $('label-detail-title');
+        const labelDetailDesc = $('label-detail-desc');
+        const labelDetailCycle = $('label-detail-cycle');
+        const cycleSectionTitle = $('cycle-section-title');
+        const labelDetailClose = $('label-detail-close');
+
+        const blockModal = $('block-modal');
+        const blockText = $('block-text');
+        const blockBtn = $('block-btn');
+        const blockIndicator = $('block-indicator');
+
+        const body = document.body;
+        const corruptionOverlay = $('corruption-overlay');
+        const scanlineOverlay = $('scanline-overlay');
+        const glitchOverlay = $('glitch-overlay');
+        const bloodOverlay = $('blood-overlay');
+
+        // ================================================================
+        //  UTILITY
+        // ================================================================
+
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        function garbledText(length = 8) {
+            const chars = '�#%&*+=-~@$^()_[]{}|;:,.<>/?';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return result;
+        }
+
+        // ================================================================
+        //  CORRUPTION ENGINE
+        // ================================================================
+
+        function applyCorruption(level) {
+            state.isCorrupted = level > 0;
+            state.corruptionStage = level;
+
+            body.classList.remove('corrupted');
+            corruptionOverlay.classList.remove('active');
+            scanlineOverlay.classList.remove('active');
+            glitchOverlay.classList.remove('active');
+            bloodOverlay.classList.remove('active');
+
+            document.querySelectorAll('.glitch-text, .glitch-block, .garbled, .blink-red, .glow-red')
+                .forEach(el => {
+                    el.classList.remove('glitch-text', 'glitch-block', 'garbled', 'blink-red', 'glow-red');
+                });
+
+            if (level === 0) {
+                body.style.backgroundColor = '#f5f5f0';
+                return;
+            }
+
+            const darkenFactor = 0.08 * level;
+            const r = Math.floor(245 - 220 * darkenFactor);
+            const g = Math.floor(245 - 220 * darkenFactor * 0.7);
+            const b = Math.floor(240 - 220 * darkenFactor * 0.5);
+            body.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+            body.classList.add('corrupted');
+
+            bloodOverlay.classList.add('active');
+            scanlineOverlay.classList.add('active');
+
+            const targets = document.querySelectorAll('.question-text, .post-title, .brand, .result-title');
+            targets.forEach(el => {
+                if (Math.random() > 0.7) {
+                    el.classList.add('glitch-text');
+                }
+            });
+
+            if (level >= 3) {
+                corruptionOverlay.classList.add('active');
+                glitchOverlay.classList.add('active');
+                document.querySelectorAll('.option-label, .forum-post, .nav-bar, .quiz-header')
+                    .forEach(el => {
+                        if (Math.random() > 0.5) {
+                            el.classList.add('glitch-block');
+                            el.setAttribute('data-text', el.textContent.slice(0, 4));
+                        }
+                    });
+            }
+        }
+
+        function redFlash(intensity = 0.15) {
+            const flash = document.createElement('div');
+            flash.style.cssText = `
+                    position: fixed; top:0; left:0; width:100%; height:100%;
+                    background: rgba(180,0,0,${intensity});
+                    pointer-events: none; z-index: 9996;
+                    transition: opacity 0.12s;
+                `;
+            document.body.appendChild(flash);
+            requestAnimationFrame(() => {
+                flash.style.opacity = '0';
+                setTimeout(() => flash.remove(), 200);
+            });
+        }
+
+        // ================================================================
+        //  结局触发
+        // ================================================================
+
+        function triggerPageCrash() {
+            // 隐藏所有界面容器
+            document.querySelectorAll('.container, .nav-bar, .forum-body, .forum-stats, #post-list, .modal-overlay, .flash-text-overlay, #corruption-overlay, #scanline-overlay, #glitch-overlay, .blood-overlay')
+                .forEach(el => {
+                    if (el) el.style.display = 'none';
+                });
+
+            // 强制body纯黑
+            document.body.style.background = '#000000';
+            document.body.style.margin = '0';
+            document.body.style.padding = '0';
+            document.body.style.overflow = 'hidden';
+            document.body.style.display = 'flex';
+            document.body.style.alignItems = 'center';
+            document.body.style.justifyContent = 'center';
+            document.body.style.minHeight = '100vh';
+
+            // 显示结局覆盖层
+            crashOverlay.classList.add('active');
+        }
+
+        function handleExit() {
+            try {
+                window.close();
+            } catch (e) {
+                document.body.innerHTML = `
+                    <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#000;color:#666;font-family:SimSun,serif;font-size:18px;letter-spacing:2px;text-align:center;padding:20px;">
+                        <div>
+                            感谢游玩。<br>
+                            <span style="color:#444;font-size:14px;margin-top:12px;display:block;">请手动关闭此页面。</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        endExitBtn.addEventListener('click', handleExit);
+
+        // ================================================================
+        //  SCREEN MANAGEMENT
+        // ================================================================
+
+        function showScreen(screenId) {
+            [registerScreen, forumScreen, quizScreen, resultScreen, postDetailScreen].forEach(el => {
+                el.classList.add('hidden');
+            });
+            const target = document.getElementById(screenId);
+            if (target) target.classList.remove('hidden');
+            window.scrollTo(0, 0);
+            updateRoundBadge();
+
+            if (screenId === 'forum-screen') {
+                updateForumPosts();
+                updateEntryUI();
+                if (state.isAuthenticated && !state.isBlocked) {
+                    entryPost.classList.add('hidden-entry');
+                    postAnnouncement.classList.remove('hidden');
+                    postAnnouncement.classList.remove('locked');
+                    if (state.labelId !== null) {
+                        const label = LABELS[state.labelId];
+                        userLabelTag.textContent = label.icon + ' ' + label.id;
+                        userLabelTag.style.display = 'inline-block';
+                        if (state.hiddenIdentityUnlocked && state.hiddenIdentityIndex >= 0) {
+                            userLabelTag.classList.add('hidden-identity');
+                        } else {
+                            userLabelTag.classList.remove('hidden-identity');
+                        }
+                    } else {
+                        userLabelTag.style.display = 'none';
+                    }
+                } else if (state.isBlocked) {
+                    entryPost.classList.add('hidden-entry');
+                    postAnnouncement.classList.remove('hidden');
+                    postAnnouncement.classList.add('locked');
+                    if (state.labelId !== null) {
+                        const label = LABELS[state.labelId];
+                        userLabelTag.textContent = label.icon + ' ' + label.id;
+                        userLabelTag.style.display = 'inline-block';
+                        if (state.hiddenIdentityUnlocked && state.hiddenIdentityIndex >= 0) {
+                            userLabelTag.classList.add('hidden-identity');
+                        } else {
+                            userLabelTag.classList.remove('hidden-identity');
+                        }
+                    } else {
+                        userLabelTag.style.display = 'none';
+                    }
+                } else {
+                    entryPost.classList.remove('hidden-entry');
+                    postAnnouncement.classList.add('hidden');
+                    userLabelTag.style.display = 'none';
+                    userLabelTag.classList.remove('hidden-identity');
+                }
+                if (state.hasCompletedOnce) {
+                    injectSecondRoundComments();
+                }
+            }
+        }
+
+        function updateEntryUI() {}
+
+        function updateRoundBadge() {
+            if (roundBadge) {
+                if (state.isAuthenticated && !state.isBlocked) {
+                    roundBadge.textContent = '✅ 已认证';
+                    roundBadge.style.background = '#1a5a1a';
+                } else if (state.isBlocked) {
+                    roundBadge.textContent = '🔒 已终止';
+                    roundBadge.style.background = '#662222';
+                } else if (state.hasCompletedOnce) {
+                    roundBadge.textContent = '🔁 二次认证';
+                    roundBadge.style.background = '#662222';
+                } else {
+                    roundBadge.textContent = '初次认证';
+                    roundBadge.style.background = '#1a1a1a';
+                }
+            }
+        }
+
+        function updateForumPosts() {
+            const posts = document.querySelectorAll('.forum-post:not(#post-announcement):not(.hidden-entry)');
+            posts.forEach((el, index) => {
+                if (index === 0 && el.id === 'entry-post') return;
+                const replyEl = el.querySelector('.post-reply');
+                if (replyEl && Math.random() > 0.6) {
+                    const current = parseInt(replyEl.textContent) || 0;
+                    const delta = Math.floor(Math.random() * 5) - 2;
+                    const newVal = Math.max(0, current + delta);
+                    replyEl.textContent = newVal;
+                }
+            });
+        }
+
+        function injectSecondRoundComments() {}
+
+        // ================================================================
+        //  REGISTER
+        // ================================================================
+
+        regForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = regUsername.value.trim();
+            const password = regPassword.value.trim();
+            const confirm = regConfirm.value.trim();
+
+            regError.textContent = '';
+
+            if (!username || username.length < 2) {
+                regError.textContent = '用户名至少2个字符';
+                return;
+            }
+            if (!password || password.length < 3) {
+                regError.textContent = '密码至少3个字符';
+                return;
+            }
+            if (password !== confirm) {
+                regError.textContent = '两次密码输入不一致';
+                return;
+            }
+
+            state.username = username;
+            forumUsername.textContent = username;
+            // 重置所有状态
+            state.isAuthenticated = false;
+            state.hasCompletedOnce = false;
+            state.round = 0;
+            state.dimensionScores = [0, 0, 0, 0];
+            state.labelId = null;
+            state.hiddenIdentityIndex = -1;
+            state.hiddenIdentityUnlocked = false;
+            state.historyUnlocked = false;
+            state.passwordAttempts = 0;
+            state.isBlocked = false;
+            state.blockAttempts = 0;
+            state.blockDialogueIndex = 0;
+            state.isBlocking = false;
+            state.totalCompletions = 0;
+            updateRoundBadge();
+            showScreen('forum-screen');
+            onlineCount.textContent = Math.floor(Math.random() * 30) + 5;
+            regForm.reset();
+            regError.textContent = '';
+            localStorage.setItem('nightforum_user', username);
+            userLabelTag.style.display = 'none';
+        });
+
+        // ================================================================
+        //  FORUM
+        // ================================================================
+
+        logoutBtn.addEventListener('click', function() {
+            navBar.classList.add('logout-effect');
+            setTimeout(() => navBar.classList.remove('logout-effect'), 800);
+
+            if (confirm('确定要退出吗？')) {
+                state.username = '';
+                localStorage.removeItem('nightforum_user');
+                state.isAuthenticated = false;
+                state.hasCompletedOnce = false;
+                state.round = 0;
+                state.dimensionScores = [0, 0, 0, 0];
+                state.labelId = null;
+                state.hiddenIdentityIndex = -1;
+                state.hiddenIdentityUnlocked = false;
+                state.historyUnlocked = false;
+                state.passwordAttempts = 0;
+                state.isBlocked = false;
+                state.blockAttempts = 0;
+                state.blockDialogueIndex = 0;
+                state.isBlocking = false;
+                state.totalCompletions = 0;
+                applyCorruption(0);
+                body.classList.remove('corrupted');
+                state.currentQuestion = 0;
+                state.answers = [];
+                state.isCorrupted = false;
+                state.corruptionStage = 0;
+                state.quizStarted = false;
+                state.isComplete = false;
+                state.selectedOption = -1;
+                showScreen('register-screen');
+                updateRoundBadge();
+                clearFeedback();
+                clearWaitingSigh();
+                if (state.effectTimer) {
+                    clearTimeout(state.effectTimer);
+                    state.effectTimer = null;
+                }
+                quizBody.classList.remove('blurred');
+                state.autoSubmitPending = false;
+                userLabelTag.style.display = 'none';
+                userLabelTag.classList.remove('hidden-identity');
+                postAnnouncement.classList.add('hidden');
+                postAnnouncement.classList.remove('locked');
+                entryPost.classList.remove('hidden-entry');
+            }
+        });
+
+        forumUsername.addEventListener('click', function() {
+            if (state.username) {
+                if (state.isBlocked) {
+                    alert('认证入口已锁定，无法重新开始。');
+                    return;
+                }
+                if (confirm('重新进行会员认证？这将重置你的认证状态。\n（点击确定开始新的答题）')) {
+                    state.isAuthenticated = false;
+                    state.hasCompletedOnce = false;
+                    state.round = 0;
+                    state.currentQuestion = 0;
+                    state.answers = [];
+                    state.isCorrupted = false;
+                    state.corruptionStage = 0;
+                    state.quizStarted = false;
+                    state.isComplete = false;
+                    state.selectedOption = -1;
+                    state.autoSubmitPending = false;
+                    state.dimensionScores = [0, 0, 0, 0];
+                    state.labelId = null;
+                    state.hiddenIdentityIndex = -1;
+                    state.hiddenIdentityUnlocked = false;
+                    state.historyUnlocked = false;
+                    state.passwordAttempts = 0;
+                    state.isBlocked = false;
+                    state.blockAttempts = 0;
+                    state.blockDialogueIndex = 0;
+                    state.isBlocking = false;
+                    state.totalCompletions = 0;
+                    applyCorruption(0);
+                    body.classList.remove('corrupted');
+                    clearFeedback();
+                    clearWaitingSigh();
+                    if (state.effectTimer) {
+                        clearTimeout(state.effectTimer);
+                        state.effectTimer = null;
+                    }
+                    quizBody.classList.remove('blurred');
+                    updateRoundBadge();
+                    userLabelTag.style.display = 'none';
+                    userLabelTag.classList.remove('hidden-identity');
+                    postAnnouncement.classList.add('hidden');
+                    postAnnouncement.classList.remove('locked');
+                    entryPost.classList.remove('hidden-entry');
+                    startQuiz();
+                }
+            }
+        });
+
+        // ================================================================
+        //  帖子点击 — 使用事件委托（修复关键）
+        // ================================================================
+
+        document.getElementById('post-list').addEventListener('click', function(e) {
+            // 查找点击的目标是否是帖子元素
+            const postEl = e.target.closest('.forum-post');
+            if (!postEl) return;
+
+            // 排除 entry-post（认证入口）和 announcement-post（公告）
+            if (postEl.classList.contains('entry-post') || postEl.id === 'post-announcement') return;
+
+            const postId = postEl.dataset.postid;
+            if (postId && POSTS[postId]) {
+                e.stopPropagation();
+                openPostDetail(postId);
+            }
+        });
+
+        // ================================================================
+        //  认证入口点击
+        // ================================================================
+
+        entryPost.addEventListener('click', function() {
+            if (!state.isAuthenticated) {
+                startQuiz();
+            } else {
+                if (!state.isBlocked) {
+                    triggerBlockSequence();
+                }
+            }
+        });
+
+        // ================================================================
+        //  公告弹窗点击
+        // ================================================================
+
+        postAnnouncement.addEventListener('click', function() {
+            if (state.isBlocked) {
+                state.blockAttempts++;
+                if (state.blockAttempts >= 4) {
+                    triggerPageCrash();
+                    return;
+                }
+                const msgs = [
+                    '认证入口已锁定，无法打开。',
+                    '我说了，已经结束了。',
+                    '你还要试多少次？',
+                    '……你真的这么想继续吗？'
+                ];
+                const idx = Math.min(state.blockAttempts - 1, msgs.length - 1);
+                alert(msgs[idx]);
+                return;
+            }
+
+            if (state.isAuthenticated && state.totalCompletions >= 2) {
+                triggerBlockSequence();
+                return;
+            }
+
+            startQuiz();
+        });
+
+        // ================================================================
+        //  二周目阻止流程
+        // ================================================================
+
+        function triggerBlockSequence() {
+            if (state.isBlocking) return;
+            if (state.isBlocked) return;
+            if (!state.isAuthenticated) {
+                startQuiz();
+                return;
+            }
+
+            state.isBlocking = true;
+            state.blockDialogueIndex = 0;
+            showBlockDialogue();
+        }
+
+        function showBlockDialogue() {
+            const idx = state.blockDialogueIndex;
+            if (idx >= BLOCK_DIALOGUES.length) {
+                finishBlockSequence();
+                return;
+            }
+
+            const dialogue = BLOCK_DIALOGUES[idx];
+            blockText.textContent = dialogue.text;
+            blockBtn.textContent = dialogue.button || '继续';
+            blockIndicator.textContent = idx < BLOCK_DIALOGUES.length - 1 ?
+                `—— ${idx+1}/${BLOCK_DIALOGUES.length} ——` :
+                '';
+
+            blockBtn.disabled = false;
+            blockModal.classList.add('active');
+        }
+
+        blockBtn.addEventListener('click', function() {
+            const idx = state.blockDialogueIndex;
+            if (idx === BLOCK_DIALOGUES.length - 1) {
+                blockModal.classList.remove('active');
+                finishBlockSequence();
+                return;
+            }
+            state.blockDialogueIndex++;
+            showBlockDialogue();
+        });
+
+        blockModal.addEventListener('click', function(e) {
+            if (e.target === blockModal) {
+                const idx = state.blockDialogueIndex;
+                if (idx < BLOCK_DIALOGUES.length - 1) {
+                    state.blockDialogueIndex++;
+                    showBlockDialogue();
+                }
+            }
+        });
+
+        function finishBlockSequence() {
+            state.isBlocking = false;
+            state.isBlocked = true;
+            state.isAuthenticated = true;
+            blockModal.classList.remove('active');
+
+            showScreen('forum-screen');
+            entryPost.classList.add('hidden-entry');
+            postAnnouncement.classList.remove('hidden');
+            postAnnouncement.classList.add('locked');
+            updateRoundBadge();
+
+            setTimeout(() => {
+                alert('认证入口已锁定。');
+            }, 300);
+        }
+
+        // ================================================================
+        //  POST DETAIL
+        // ================================================================
+
+        function openPostDetail(postId) {
+            const post = POSTS[postId];
+            if (!post) {
+                console.warn('帖子不存在:', postId);
+                return;
+            }
+
+            postDetailTitle.textContent = post.title;
+            postDetailContent.innerHTML = post.content;
+
+            let comments = post.comments ? post.comments.slice() : [];
+            if (state.hasCompletedOnce && SECOND_ROUND_COMMENTS[postId]) {
+                comments = comments.concat(SECOND_ROUND_COMMENTS[postId]);
+            }
+
+            postComments.innerHTML = '';
+            if (comments.length > 0) {
+                comments.forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = 'comment';
+                    div.innerHTML =
+                        `<span class="comment-user">${c.user}</span><span class="comment-time">${c.time}</span>：${c.text}`;
+                    postComments.appendChild(div);
+                });
+            } else {
+                postComments.innerHTML = '<div style="color:#999;font-size:13px;">暂无评论</div>';
+            }
+
+            [actionLike, actionReply, actionShare].forEach(btn => {
+                btn.classList.remove('disabled');
+                btn.disabled = false;
+                btn.style.cursor = 'pointer';
+            });
+
+            if (!post.allowReply) {
+                actionReply.classList.add('disabled');
+                actionReply.disabled = true;
+                actionReply.style.cursor = 'not-allowed';
+            }
+            if (!post.allowLike) {
+                actionLike.classList.add('disabled');
+                actionLike.disabled = true;
+                actionLike.style.cursor = 'not-allowed';
+            }
+            if (!post.allowShare) {
+                actionShare.classList.add('disabled');
+                actionShare.disabled = true;
+                actionShare.style.cursor = 'not-allowed';
+            }
+
+            postDetailFooter.innerHTML = '';
+            if (post.isRules) {
+                if (!state.isAuthenticated) {
+                    setTimeout(() => {
+                        const footer = postDetailFooter;
+                        if (footer && !footer.querySelector('.creepy-message')) {
+                            footer.innerHTML = `<div class="creepy-message">${post.creepyMessage || '你还在看什么？：)'}</div>`;
+                        }
+                    }, 4000);
+                } else {
+                    postDetailFooter.innerHTML = '<span style="color:#888;">已认证会员 · 规则已阅</span>';
+                }
+            } else {
+                postDetailFooter.innerHTML = '<span style="color:#999;">帖子发布于 2012年</span>';
+            }
+
+            showScreen('post-detail-screen');
+        }
+
+        postDetailBack.addEventListener('click', function() {
+            showScreen('forum-screen');
+        });
+
+        function handleAction(btn, actionName) {
+            if (state.isBlocked) {
+                alert('论坛功能已受限。');
+                return;
+            }
+            if (!state.isAuthenticated) {
+                alert('请先返回论坛进行会员认证，才能进行此操作。');
+                return;
+            }
+            if (btn.disabled) {
+                alert('此帖子禁止' + actionName);
+                return;
+            }
+            alert('操作成功！(模拟)');
+        }
+
+        actionLike.addEventListener('click', function() { handleAction(this, '点赞'); });
+        actionReply.addEventListener('click', function() { handleAction(this, '回复'); });
+        actionShare.addEventListener('click', function() { handleAction(this, '分享'); });
+
+        // ================================================================
+        //  QUIZ DATA
+        // ================================================================
+
+        function getQuestionData(idx, round, answers) {
+            const base = QUESTIONS[idx];
+            let text文本 = base.text文本;
+            let options选项 = base.options选项.slice();
+            let feedbacks反馈 = base.feedbacks反馈 ? base.feedbacks反馈.slice() : [];
+            let scores分数 = base.scores分数 ? base.scores分数.map(arr => arr.slice()) : [];
+
+            if (round === 1 && SECOND_ROUND_OVERRIDES[idx]) {
+                const override = SECOND_ROUND_OVERRIDES[idx];
+                text文本 = override.text文本;
+                options选项 = override.options选项.slice();
+            }
+
+            applyLinkage({ text文本, options选项, feedbacks反馈, scores分数 }, idx, answers);
+
+            return返回 { text, options, feedbacks, scores };返回返回{ 文本, 选项, 反馈, 分数 };
+        }
+
+        function函数 applyLinkage(q, idx, answers) {函数applyLinkage(q, idx, answers答案) {
+            if如果 (idx === 2 && answers.length > 0 && answers[0] === 3) {如果 (idx索引 === 2 && answers.length > 0 && answers答案[0] === 3) {
+                q.options.push('命运让我无法入睡');
+                q.feedbacks.push('命运让你无法入睡？那你一定有很多心事。');
+                q.scores.push([0, 0, 1, 1]);
+            }
+            if如果 (idx === 5 && answers.length > 3 && answers[3] === 3) {如果 (idx索引 === 5 && answers答案.length > 3 && answers答案[3] === 3) {
+                q.options选项 = ['没有', '有一点', '它就在我身后'];
+                q.feedbacks反馈 = ['没有？那就好。', '有一点？你要小心。', '它就在你身后？不要回头。'];q.反馈反馈 = ['没有？那就好。', '有一点？你要小心。', '它就在你身后？不要回头。'];
+                q.scores分数 = [q.分数 = [
+                    [2, 0, 0, 0],
+                    [1, 0, 1, 0],
+                    [0, 0, 1, 2]
+                ];
+            }
+            if如果 (idx === 9 && answers.some一些一些((a, i) => i < 9 && a === 2)) {如果 (idx索引 === 9 并且 answers答案.some一些一些((a, i) => i < 9 && a === 2)) {如果 (idx === 9 并且 answers.some((a, i) => i < 9 && a === 2)) {如果 (idx === 9 并且 answers.some((a, i) => i < 9 && a === 2)) {如果 (idx === 9 并且 answers.some((a, i) => i < 9 && a === 2)) {如果 (idx === 9 并且 answers.some((a, i) => i < 9 && a === 2)) {如果 (idx === 9 并且 answers.some((a, i) => i < 9 && a === 2)) {如果 (idx === 9 并且 answers.some((a, i) => i < 9 && a === 2)) {如果 (idx === 9 并且 answers.some((a, i) => i < 9 && a === 2)) {如果 (idx === 9 并且 answers.some((a, i) => i < 9 && a === 2)) {如果 (idx === 9 并且 answers.some((a, i) => i < 9 && a === 2)) {如果 (idx === 9 并且 answers.some((a, i) => i < 9 && a === 2)) {如果 (idx === 9 并且 answers.some((a, i) => i < 9 && a === 2)) {如果 (idx === 9 并且 answers.some((a, i) => i < 9 && a === 2)) {如果 (idx === 9 并且 answers.some((a, i) => i < 9 && a === 2)) {如果 (idx === 9 并且 answers.some((a, i) => i < 9 && a === 2)) {
+                q.options选项选项.push推送推送('我感觉到重复');
+                q.feedbacks反馈反馈.push推送('你感觉到重复，是因为你确实在重复。q.feedbacks反馈反馈.推送('你感觉到重复，是因为你确实在重复。
